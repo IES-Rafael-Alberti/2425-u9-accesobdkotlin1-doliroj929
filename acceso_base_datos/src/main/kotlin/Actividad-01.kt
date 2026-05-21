@@ -1,21 +1,42 @@
-
-import java.sql.DriverManager
-import java.sql.SQLException
-
-
 fun main() {
-    val url = "jdbc:h2:./DataBase/mydb"
-    val usuario = "user"
-    val contrasena = "1010"
 
-    try {
-        Class.forName("org.h2.Driver")
-        val conexion = DriverManager.getConnection(url, usuario, contrasena)
-        println("Conexión exitosa")
-        conexion.close()
-    } catch (e: SQLException) {
-        println("Error en la conexión: ${e.message}")
-    } catch (e: ClassNotFoundException) {
-        println("No se encontró el driver JDBC: ${e.message}")
-    }
+    GestorBaseDeDatos.crearTablas()
+
+
+    GestorBaseDeDatos.conectar()?.use { conexion ->
+
+
+        val tiendaDao = TiendaDAO(conexion)
+
+
+        println("\n--- PROCESANDO USUARIOS ---")
+        val usuariosAInsertar = listOf(
+            Usuario(nombre = "Facundo Pérez", email = "facuper@mail.com"),
+            Usuario(nombre = "Ataulfo Rodríguez", email = "ataurod@mail.com"),
+            Usuario(nombre = "Cornelio Ramírez", email = "Cornram@mail.com")
+        )
+
+        for (usuario in usuariosAInsertar) {
+            val exito = tiendaDao.insertarUsuario(usuario)
+            if (exito) {
+                println("-> Guardado: ${usuario.nombre}")
+            }
+        }
+
+
+        println("\n--- PROCESANDO PRODUCTOS ---")
+        val productosAInsertar = listOf(
+            Producto(nombre = "Ventilador", precio = 10.0, stock = 2),
+            Producto(nombre = "Abanico", precio = 150.0, stock = 47),
+            Producto(nombre = "Estufa", precio = 24.99, stock = 1)
+        )
+
+        for (producto in productosAInsertar) {
+            val exito = tiendaDao.insertarProducto(producto)
+            if (exito) {
+                println("-> Guardado: ${producto.nombre}")
+            }
+        }
+
+    } ?: println("No se pudo iniciar el programa porque la conexión falló.")
 }

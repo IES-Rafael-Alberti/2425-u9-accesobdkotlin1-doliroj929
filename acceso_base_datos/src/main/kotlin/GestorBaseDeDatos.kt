@@ -5,7 +5,7 @@ import java.nio.file.Path
 
 object GestorBaseDeDatos {
 
-    // Cambia la ruta según tu estructura (esta la guarda en la raíz del proyecto)
+
     private val rutaBase: Path = Path.of("datos", "tienda_db").toAbsolutePath().normalize()
     private val url = "jdbc:h2:file:$rutaBase;AUTO_SERVER=TRUE"
     private const val USUARIO = "sa"
