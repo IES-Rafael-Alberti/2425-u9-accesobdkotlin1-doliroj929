@@ -5,7 +5,6 @@ import java.nio.file.Path
 
 object GestorBaseDeDatos {
 
-
     private val rutaBase: Path = Path.of("datos", "tienda_db").toAbsolutePath().normalize()
     private val url = "jdbc:h2:file:$rutaBase;AUTO_SERVER=TRUE"
     private const val USUARIO = "sa"
@@ -42,11 +41,34 @@ object GestorBaseDeDatos {
             );
         """.trimIndent()
 
+        val sqlPedido = """
+            CREATE TABLE IF NOT EXISTS Pedido (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                precioTotal DECIMAL NOT NULL,
+                idUsuario INT,
+                FOREIGN KEY (idUsuario) REFERENCES Usuario(id)
+            );
+        """.trimIndent()
+
+        val sqlLineaPedido = """
+            CREATE TABLE IF NOT EXISTS LineaPedido (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                cantidad INT NOT NULL,
+                precio DECIMAL NOT NULL,
+                idPedido INT,
+                idProducto INT,
+                FOREIGN KEY (idPedido) REFERENCES Pedido(id),
+                FOREIGN KEY (idProducto) REFERENCES Producto(id)
+            );
+        """.trimIndent()
+
         conectar()?.use { conexion ->
             try {
                 conexion.createStatement().use { stmt ->
                     stmt.execute(sqlUsuario)
                     stmt.execute(sqlProducto)
+                    stmt.execute(sqlPedido)
+                    stmt.execute(sqlLineaPedido)
                     println("Tablas creadas o verificadas con éxito.")
                 }
             } catch (e: SQLException) {
